@@ -1,0 +1,135 @@
+you can use anyone one case among these 
+Flight booking support- 1st use case
+railway reservation support- 2nd use case
+any model service providers- 3rd usecase
+
+Key feature of IVR:
+menu-driven navigation
+call routing
+self-service (balance enquiry, language change)
+
+VXML- voice xml
+markup language similar to a html, like html but this is not used for voice applcations
+
+IVR system what to say, what to ask, and how to handle the input from the caller 
+what to say: prompt hello, welcome to this airlines agency cutomer support, how an I help you?
+what to ask: prompt like press 1 for booking enquiry press 2 for flight status
+handle the input: if the caller press 1, this call is routed to the booking agent, similarly if the caller press 2 it 
+
+<vxml>  root element 
+<form> represent as a dialogue /main-menu 
+<field> this collect input from the caller
+<prompt> pre-recorded audio or text  speech 
+<grammar> defines if the caller has given valid input which is represented in the form of menu
+<goto> jumping from one from to another form, revolves around th e main-menu
+
+minimal example:
+
+<?xml version="0.1" encoding ="UTF"?>
+<vxml version="2.1">
+<form id="main menu">
+<block>
+<prompt> Hello welcome to the air india ao=irline customer support, How can I help you?  Press 1 for flight booking </prompt>
+</block>
+</form>
+</vxml>
+
+handles the input from thr caller-speech
+
+<?xml version="1.0" encoding ="UTF-8"?>
+<VXML VERSION="2.1">
+<form id="main-menu">
+<field name="choice">
+<prompt>
+press 1 for flight booking, press 2 for flight status, press 3 for luggage allowances
+</prompt>
+<grammar type="application/grammer+xml" mode="dtmf">
+1|2|3
+</grammar>
+<filled>
+<if cond="choice==1">
+<goto next="#booking"/>
+<elseif cond ="choice==2">
+<goto next =" #flight-status"/>
+<elseif cond="choice==3">
+<goto next ="# luggage"/>
+<else>
+<prompt>invalid choice, please try again </prompt>
+</if>
+</filled>
+</form>
+</vxml>
+
+2 choices
+1st-separate this vxml file statically and implement with the web server-backend
+2nd- you can add this vxml part into the backend -web server to run the application
+
+web server- backend -fast application
+
+pip install fastapi uvicorn
+
+from fastapi import FASTAPI 
+
+app = FASTAPI() 
+
+@app.get("/") 
+def read_root():
+    return{"message":"HELLO! IVR"}
+    
+    @app.get("/ivr")
+def ivr_menu():
+    vxml = """<?xml version="1.0"?>
+    <vxml version ="2.1">
+    <form>
+    <block>
+    <prompt> Welcome to air India customer support IVR. press 1 for booking enquiry, press 2 for flight
+    </prompt>
+    </block>
+    </form>
+    </vxml>
+    """
+    return Response(content = vxml, media_type="application/xml")
+    
+AI1-flight id,one I should know this particular flight id/I can search these many flights using /flights delhi -chennai
+
+www.airindia.com/flights/AI1 -Delhi to chennai flights info
+
+path params, query params, and type hints
+from fastapi import FastAPI 
+ 
+app=FastAPI()
+
+@app.get('/flights/{flight_id}')
+def get_flight(flight_id:int,details:bool=False):
+    return {"flight_id":flight_id,"details":details}
+
+Request body &pydamic models
+
+from pydantic import BaseModel,Field
+from fastapi import FastAPI
+
+app=FastAPI()
+
+class Booking(BaseModel):
+    flight_id: int 
+    passenger_name:str =field(...,min_lenth=2)
+    seats:int =Field(1,gt=0) 
+
+@app.post("/booking",status_code=201) 
+def create_booking(booking:Booking):
+    return {"message":"Booked","booking":booking.dict()}
+
+
+ATC/001
+Bob
+
+422 response error +validation error
+
+
+HTTP Methods:
+
+Get- Retrive the data -search for flight
+Post- Creates a new data -Book a new flight
+Put - Updates the entire resource -updates/replace
+Patch - Updates the partial resources - change the passenger names only
+Delete- delete the dat- cancel booking
