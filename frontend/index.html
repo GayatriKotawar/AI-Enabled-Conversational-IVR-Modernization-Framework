@@ -233,6 +233,61 @@
     }
   </style>
 </head>
+<script>
+const ivrOutput = document.getElementById("ivrOutput");
+const keypad = document.getElementById("keypad");
+const speaking = document.getElementById("speakingIndicator");
+const statusText = document.getElementById("statusText");
+
+let callActive = false;
+
+async function startCall() {
+  ivrOutput.innerHTML = "<p>📞 Connecting to Air India IVR...</p>";
+  statusText.textContent = "In Call";
+  callActive = true;
+
+  const res = await fetch("http://127.0.0.1:8000/ivr", { method: "POST" });
+  const xml = await res.text();
+  showMessage(parseIVR(xml));
+  keypad.removeAttribute("aria-hidden");
+}
+
+function showMessage(text) {
+  ivrOutput.innerHTML += `<p>${text}</p>`;
+  ivrOutput.scrollTop = ivrOutput.scrollHeight;
+}
+
+function parseIVR(xml) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, "text/xml");
+  const say = doc.querySelector("Say");
+  return say ? say.textContent : "No IVR message.";
+}
+
+async function pressKey(num) {
+  if (!callActive) return;
+  showMessage(`You pressed ${num}`);
+  const formData = new FormData();
+  formData.append("Digits", num);
+  const res = await fetch("http://127.0.0.1:8000/handle-key", {
+    method: "POST",
+    body: formData,
+  });
+  const xml = await res.text();
+  showMessage(parseIVR(xml));
+}
+
+document.querySelectorAll(".key").forEach(k => {
+  k.addEventListener("click", () => pressKey(k.dataset.key));
+});
+
+const startBtn = document.createElement("button");
+startBtn.textContent = "Start Call";
+startBtn.className = "btn call";
+startBtn.onclick = startCall;
+document.querySelector(".actions")?.appendChild(startBtn);
+</script>
+
 <body>
 
   <div class="device">

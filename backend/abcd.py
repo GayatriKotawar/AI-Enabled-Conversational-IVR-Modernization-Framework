@@ -2,12 +2,18 @@ from fastapi import FastAPI, HTTPException, Request, Response, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from twilio.twiml.voice_response import VoiceResponse, Gather
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return FileResponse("index.html")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -283,13 +289,3 @@ async def handle_key(request: Request):
         response.redirect("/ivr")
 
     return Response(content=str(response), media_type="application/xml")
-
-
-# Helper functions and other backend routes remain unchanged
-# Remove all azure.communication.callautomation and related code
-
-# Deployment Note:
-# - Deploy your FastAPI app at your HTTPS endpoint (e.g. https://yourdomain.com)
-# - In Twilio Console, configure your phone number +18314805664's "Voice & Fax" webhook URL to:
-#    - Incoming calls webhook: https://yourdomain.com/ivr (HTTP POST)
-# This completes the integration with Twilio for voice call handling.
