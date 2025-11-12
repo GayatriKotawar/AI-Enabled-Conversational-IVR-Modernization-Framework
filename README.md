@@ -26,6 +26,7 @@ Modular FastAPI backend: Handles booking, status queries, and other support flow
 Error handling and logging: Ensures robustness and traceability for every call session.
 
 Seamless deployment: Easily hostable using ngrok or any cloud platform (AWS, Azure, Render, etc.).
+
 Milestone 1:
 
 Objective: Assess current VXML-based systems and define technical and functional integration requirements
@@ -42,6 +43,7 @@ Tasks:
 • Design and implement connectors or APIs to enable communication between VXML and ACS/BAP
 • Ensure real-time data handling and system compatibility
 • Validate integration layer with sample transaction and flow testing
+
 Milestone 3:
 
 Objective: Introduce natural language capabilities to the IVR system via conversational flows
