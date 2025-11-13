@@ -38,10 +38,7 @@ STATIC_CHECK_PATH = os.path.join(FRONTEND_DIR, "index.html")
 app = FastAPI(title=API_TITLE, version=API_VERSION)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("airindia_ivr_merged")
-origins = [
-    "https://ai-enabled-conversational-ivr-1wkn.onrender.com", 
-    # Add other domains if needed, e.g., your custom domain later
-]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # tighten for prod
