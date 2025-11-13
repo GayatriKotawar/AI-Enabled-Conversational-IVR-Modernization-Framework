@@ -482,9 +482,9 @@ async function handleBooking(digit){
 
 /* -------------- Backend integration -------------- */
 async function fetchIVRFromBackend() {
+  const BACKEND_BASE = "https://airindia-ivr-backend-xxxxx.onrender.com";
   try {
     showMessage('Calling backend /ivr...');
-    const BACKEND_BASE = "https://airindia-ivr-backend-xxxxx.onrender.com";
     const res = await fetch(`${BACKEND_BASE}/ivr`, { method: 'POST' });
     if (!res.ok) {
       showMessage(`Backend /ivr returned ${res.status}`);
