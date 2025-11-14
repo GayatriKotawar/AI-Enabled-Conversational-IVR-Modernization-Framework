@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>IVR Call Simulator — Royal Purple</title>
   <style>
+    /* (same CSS as you provided) */
     :root{
       --bg-grad: linear-gradient(135deg,#2b0037 0%, #5b1aa0 40%, #ff6ec7 100%);
       --panel: rgba(255,255,255,0.06);
@@ -19,7 +20,6 @@
       --transition: 240ms cubic-bezier(.2,.9,.3,1);
       font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
     body{
@@ -32,8 +32,6 @@
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
-
-    /* Shell */
     .device {
       width:100%;
       max-width:920px;
@@ -42,8 +40,6 @@
       gap:22px;
       align-items:start;
     }
-
-    /* Left: phone panel */
     .phone {
       background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
       border-radius: var(--radius);
@@ -55,182 +51,46 @@
       overflow:hidden;
       border:1px solid rgba(255,255,255,0.03);
     }
-
-    .header {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:12px;
-    }
-
-    .brand {
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .logo {
-      width:44px;height:44px;border-radius:10px;
-      background: linear-gradient(135deg,#5b1aa0,#ff6ec7);
-      display:grid;place-items:center;color:white;font-weight:700;font-size:18px;
-      box-shadow: 0 6px 18px rgba(91,26,160,0.24), inset 0 -4px 12px rgba(0,0,0,0.15);
-    }
-    .title {
-      color:var(--muted);
-      font-size:14px;
-      line-height:1;
-    }
+    .header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .brand { display:flex; gap:12px; align-items:center; }
+    .logo { width:44px;height:44px;border-radius:10px; background: linear-gradient(135deg,#5b1aa0,#ff6ec7); display:grid;place-items:center;color:white;font-weight:700;font-size:18px; box-shadow: 0 6px 18px rgba(91,26,160,0.24), inset 0 -4px 12px rgba(0,0,0,0.15); }
+    .title { color:var(--muted); font-size:14px; line-height:1; }
     .subtitle { color: rgba(255,255,255,0.5); font-size:12px; margin-top:4px; }
-
-    .status-pill {
-      display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.03);
-    }
+    .status-pill { display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); }
     .status-icon { font-size:20px; }
     .status-text { color:var(--accent); font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.9px; }
-
-    /* Screen area */
-    .screen {
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:12px;
-      padding:18px;
-      margin-top:8px;
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      border:1px solid rgba(255,255,255,0.025);
-    }
-
-    .call-info {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .caller {
-      display:flex;flex-direction:column;
-    }
+    .screen { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; padding:18px; margin-top:8px; flex:1; display:flex; flex-direction:column; gap:14px; border:1px solid rgba(255,255,255,0.025); }
+    .call-info { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .caller { display:flex;flex-direction:column; }
     .caller-number { color:white; font-weight:700; font-size:18px; letter-spacing:0.6px; }
     .call-duration { color:var(--accent); font-weight:600; font-size:13px; margin-top:6px; }
-
-    .speaker-box {
-      width:88px;height:88px;border-radius:12px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      display:grid;place-items:center;border:1px solid rgba(255,255,255,0.02);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-    }
+    .speaker-box { width:88px;height:88px;border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:grid;place-items:center;border:1px solid rgba(255,255,255,0.02); box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
     .speaker-emoji { font-size:34px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.45)); }
-
-    /* IVR output */
-    .ivr {
-      background: var(--glass);
-      border-radius:12px;
-      padding:14px;
-      min-height:160px;
-      max-height:240px;
-      overflow:auto;
-      border:1px solid rgba(255,255,255,0.02);
-    }
+    .ivr { background: var(--glass); border-radius:12px; padding:14px; min-height:160px; max-height:240px; overflow:auto; border:1px solid rgba(255,255,255,0.02); }
     .ivr p { margin-bottom:10px; color: #fff; opacity:0.95; line-height:1.45; animation:fadeUp .28s ease; }
     .ivr p.note { color: rgba(255,255,255,0.75); opacity:0.9; }
-
     @keyframes fadeUp { from {opacity:0; transform:translateY(8px)} to {opacity:1; transform:none} }
-
-    .speaking {
-      display:flex;gap:6px;align-items:center;justify-content:flex-start;
-      margin-top:6px;
-    }
+    .speaking { display:flex;gap:6px;align-items:center;justify-content:flex-start; margin-top:6px; }
     .bar { width:5px; height:14px; background:var(--accent); border-radius:3px; transform-origin:center bottom; animation:voice 0.9s infinite ease-in-out; opacity:0.95; }
-    .bar:nth-child(2) { animation-delay:0.08s }
-    .bar:nth-child(3) { animation-delay:0.16s }
-    .bar:nth-child(4) { animation-delay:0.22s }
-    @keyframes voice {
-      0%,100% { transform:scaleY(0.45) }
-      50% { transform:scaleY(1.6) }
-    }
+    .bar:nth-child(2) { animation-delay:0.08s } .bar:nth-child(3) { animation-delay:0.16s } .bar:nth-child(4) { animation-delay:0.22s }
+    @keyframes voice { 0%,100% { transform:scaleY(0.45) } 50% { transform:scaleY(1.6) } }
     .speaking.hidden { display:none }
-
-    /* keypad */
-    .controls {
-      display:flex;
-      gap:18px;
-      align-items:center;
-      justify-content:space-between;
-      margin-top:10px;
-      flex-wrap:wrap;
-    }
-
-    .keypad {
-      display:grid;
-      grid-template-columns: repeat(3,64px);
-      gap:12px;
-      justify-content:flex-start;
-      align-items:center;
-    }
-
-    .key {
-      width:64px;height:64px;border-radius:12px;
-      display:flex;flex-direction:column;justify-content:center;align-items:center;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.03);
-      cursor:pointer; transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
-      color:white; user-select:none;
-    }
-    .key .num { font-size:18px; font-weight:700 }
-    .key .letters { font-size:10px; opacity:0.75; margin-top:2px }
-
-    .key:active { transform:translateY(3px) scale(0.99) }
-    .key.disabled { opacity:0.45; pointer-events:none; transform:none }
-
-    .actions {
-      display:flex; gap:12px; margin-left:auto;
-    }
-    .btn {
-      padding:12px 14px; border-radius:12px; font-weight:700; cursor:pointer;
-      border:none; display:inline-flex; align-items:center; gap:8px; justify-content:center;
-      transition: transform var(--transition), box-shadow var(--transition);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
-    }
-    .btn.call {
-      background: linear-gradient(90deg, #b06bff, #ff7bd6);
-      color: #1a0424; transform-origin:center;
-    }
-    .btn.hang {
-      background: linear-gradient(90deg,#ff6b6b,#ff9c9c);
-      color: white;
-    }
+    .controls { display:flex; gap:18px; align-items:center; justify-content:space-between; margin-top:10px; flex-wrap:wrap; }
+    .keypad { display:grid; grid-template-columns: repeat(3,64px); gap:12px; justify-content:flex-start; align-items:center; }
+    .key { width:64px;height:64px;border-radius:12px; display:flex;flex-direction:column;justify-content:center;align-items:center; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); cursor:pointer; transition: transform var(--transition), box-shadow var(--transition), background var(--transition); color:white; user-select:none; }
+    .key .num { font-size:18px; font-weight:700 } .key .letters { font-size:10px; opacity:0.75; margin-top:2px }
+    .key:active { transform:translateY(3px) scale(0.99) } .key.disabled { opacity:0.45; pointer-events:none; transform:none }
+    .actions { display:flex; gap:12px; margin-left:auto; }
+    .btn { padding:12px 14px; border-radius:12px; font-weight:700; cursor:pointer; border:none; display:inline-flex; align-items:center; gap:8px; justify-content:center; transition: transform var(--transition), box-shadow var(--transition); box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+    .btn.call { background: linear-gradient(90deg, #b06bff, #ff7bd6); color: #1a0424; transform-origin:center; }
+    .btn.hang { background: linear-gradient(90deg,#ff6b6b,#ff9c9c); color: white; }
     .btn:disabled { opacity:0.55; cursor:not-allowed; transform:none; box-shadow:none }
-
-    /* Right column - call history & settings */
-    .side {
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius: var(--radius);
-      padding:18px;
-      box-shadow: var(--shadow);
-      border:1px solid rgba(255,255,255,0.02);
-      height:560px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+    .side { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius: var(--radius); padding:18px; box-shadow: var(--shadow); border:1px solid rgba(255,255,255,0.02); height:560px; display:flex; flex-direction:column; gap:12px; }
     .side h4 { color:var(--muted); font-size:13px; font-weight:700; letter-spacing:0.8px }
-    .history {
-      background: rgba(255,255,255,0.03);
-      border-radius:12px;padding:12px;flex:1;overflow:auto;border:1px solid rgba(255,255,255,0.02)
-    }
+    .history { background: rgba(255,255,255,0.03); border-radius:12px;padding:12px;flex:1;overflow:auto;border:1px solid rgba(255,255,255,0.02) }
     .entry { padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03); color:rgba(255,255,255,0.85); font-size:13px }
-    .entry:last-child { border-bottom:none }
-    .small { color:rgba(255,255,255,0.6); font-size:12px; margin-top:6px }
-
-    /* responsive */
-    @media (max-width:920px){
-      .device { grid-template-columns: 1fr; }
-      .side { height:auto; order:2 }
-      .phone { order:1 }
-    }
+    .entry:last-child { border-bottom:none } .small { color:rgba(255,255,255,0.6); font-size:12px; margin-top:6px }
+    @media (max-width:920px){ .device { grid-template-columns: 1fr; } .side { height:auto; order:2 } .phone { order:1 } }
   </style>
 </head>
 
@@ -313,7 +173,9 @@
 
 <script>
 /* -------------- Configuration -------------- */
-const BACKEND_BASE = 'https://ai-enabled-conversational-ivr-bctv.onrender.com'; // change if backend runs elsewhere
+/* <-- REPLACE with your Render backend URL (already set to the one you provided) --> 
+/* -------------- Configuration -------------- */
+const BACKEND_BASE = "https://ai-enabled-conversational-ivr-bctv.onrender.com";
 /* -------------- Elements -------------- */
 const btnCall = document.getElementById('btnCall');
 const btnHang = document.getElementById('btnHangup');
@@ -332,6 +194,7 @@ let callStart = null;
 let durationTimer = null;
 let currentMenu = 'main';
 let history = [];
+let frontendCallSid = null; // a simple local CallSid to correlate requests
 
 /* -------------- Audio beep -------------- */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -360,13 +223,13 @@ function appendIVR(text, opts={className:''}) {
 }
 
 function showMessage(text) {
-  // use backticks if text contains interpolation; caller should pass final string
   ivrOutput.innerHTML += `<p>${escapeHtml(text)}</p>`;
   ivrOutput.scrollTop = ivrOutput.scrollHeight;
 }
 
 function escapeHtml(unsafe) {
-  return unsafe
+  return (unsafe || "")
+    .toString()
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
@@ -481,43 +344,87 @@ async function handleBooking(digit){
 }
 
 /* -------------- Backend integration -------------- */
+/* Notes:
+   - backend expects Twilio-style form params; we include CallSid so server can correlate.
+   - backend returns either XML (TwiML) or JSON; handle both.
+*/
 async function fetchIVRFromBackend() {
   try {
     showMessage('Calling backend /ivr...');
-    const res = await fetch(`${BACKEND_BASE}/ivr`, { method: 'POST' });
+    // generate a short frontend CallSid to correlate requests
+    frontendCallSid = frontendCallSid || `FE_${Date.now()}`;
+    const fd = new FormData();
+    fd.append('CallSid', frontendCallSid);
+    // use fetch with POST, let browser set multipart/form-data
+    const res = await fetch(`${BACKEND_BASE}/ivr`, {
+      method: 'POST',
+      mode: 'cors',
+      body: fd,
+    });
     if (!res.ok) {
       showMessage(`Backend /ivr returned ${res.status}`);
       return;
     }
-    const xml = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, 'text/xml');
-    const say = doc.querySelector('Say');
-    showMessage(`Backend: ${say ? say.textContent : xml}`);
+    const ct = res.headers.get('content-type') || '';
+    const text = await res.text();
+    if (ct.includes('application/xml') || ct.includes('text/xml') || text.trim().startsWith('<')) {
+      // TwiML XML: show parsed <Say> text if any, else full XML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/xml');
+      const say = doc.querySelector('Say');
+      if (say && say.textContent) showMessage(`Backend (Say): ${say.textContent}`);
+      else showMessage(`Backend (XML): ${text}`);
+    } else {
+      // assume JSON
+      try {
+        const j = JSON.parse(text);
+        showMessage(`Backend: ${JSON.stringify(j)}`);
+      } catch (e) {
+        showMessage(`Backend (raw): ${text}`);
+      }
+    }
   } catch (e) {
     showMessage(`Backend error: ${e.message}`);
+    console.error(e);
   }
 }
 
 // Press key -> send to backend (if you want to test backend handling)
 async function sendKeyToBackend(digit) {
-  if (!callActive) return;
+  if (!callActive) {
+    showMessage('Call not active — key ignored (use Start Call).');
+    return;
+  }
   try {
     showMessage(`You pressed ${digit} (sending to backend)`);
-    const formData = new FormData();
-    formData.append('Digits', digit);
-    const res = await fetch(`${BACKEND_BASE}/handle-key`, { method: 'POST', body: formData });
+    frontendCallSid = frontendCallSid || `FE_${Date.now()}`;
+    const fd = new FormData();
+    fd.append('CallSid', frontendCallSid);
+    fd.append('Digits', (digit || '').toString());
+    const res = await fetch(`${BACKEND_BASE}/handle-key`, { method: 'POST', mode: 'cors', body: fd });
     if (!res.ok) {
       showMessage(`/handle-key returned ${res.status}`);
       return;
     }
-    const xml = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, 'text/xml');
-    const say = doc.querySelector('Say');
-    showMessage(say ? say.textContent : xml);
+    const ct = res.headers.get('content-type') || '';
+    const text = await res.text();
+    if (ct.includes('xml') || text.trim().startsWith('<')) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/xml');
+      const say = doc.querySelector('Say');
+      if (say && say.textContent) showMessage(`Backend (Say): ${say.textContent}`);
+      else showMessage(`Backend (XML): ${text}`);
+    } else {
+      try {
+        const j = JSON.parse(text);
+        showMessage(`/handle-key JSON: ${JSON.stringify(j)}`);
+      } catch (e) {
+        showMessage(`/handle-key raw: ${text}`);
+      }
+    }
   } catch (e) {
     showMessage(`Backend error: ${e.message}`);
+    console.error(e);
   }
 }
 
@@ -526,8 +433,8 @@ async function onKeyPress(d) {
   if (!callActive) return;
   playBeep();
   appendIVR(`[You pressed: ${d}]`);
-  // choose: local simulator or backend integration
-  // If you want to use backend, call sendKeyToBackend(d)
+  // By default use local simulator; if you want backend-driven IVR uncomment the sendKeyToBackend line
+  // await sendKeyToBackend(d);
   if (currentMenu === 'main') await handleMain(d);
   else if (currentMenu === 'booking') await handleBooking(d);
 }
@@ -544,6 +451,8 @@ async function startCall(){
   startDuration();
   addLog('Outgoing','Connected');
   currentMenu = 'main';
+  // create a new frontend CallSid for the call
+  frontendCallSid = `FE_${Date.now()}`;
   await playWelcome();
 }
 
@@ -577,6 +486,8 @@ keys.forEach(k => {
   k.addEventListener('click', () => {
     const d = k.getAttribute('data-key');
     onKeyPress(d);
+    // optionally send key to backend when callActive:
+    if (callActive) sendKeyToBackend(d);
   });
 });
 
