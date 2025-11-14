@@ -276,9 +276,8 @@ def generate_ai_reply(prompt: str, session_history: Optional[List[Dict[str,str]]
 
 # ---------- Twilio IVR endpoints (merged & stateful) ----------
 @app.post("/ivr")
-def ivr():
-    # keep GET /ivr for quick browser checks (returns JSON)
-    return {"status": "connected", "message": "Hello from IVR (GET)"}
+async def ivr_post():
+    return {"status": "connected", "message": "Hello from IVR (POST)"}
 
 # --- NEW: allow POST /ivr for your frontend which expects TwiML/XML ---
 @app.post("/ivr")
