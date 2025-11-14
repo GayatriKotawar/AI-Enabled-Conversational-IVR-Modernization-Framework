@@ -30,7 +30,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if OPENAI_API_KEY and OPENAI_AVAILABLE:
     openai.api_key = OPENAI_API_KEY
 
-AGENT_NUMBER = os.getenv("AGENT_NUMBER", "+911234567890")
+AGENT_NUMBER = os.getenv("AGENT_NUMBER", "+18314805664")
 FRONTEND_DIR = os.getenv("FRONTEND_DIR", os.path.join(os.path.dirname(__file__), "frontend"))
 STATIC_CHECK_PATH = os.path.join(FRONTEND_DIR, "index.html")
 
