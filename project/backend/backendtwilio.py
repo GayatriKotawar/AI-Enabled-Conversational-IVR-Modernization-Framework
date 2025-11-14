@@ -275,7 +275,7 @@ def generate_ai_reply(prompt: str, session_history: Optional[List[Dict[str,str]]
     return "I'm not sure how to help with that right now. Would you like to check the main menu, or speak to an agent?"
 
 # ---------- Twilio IVR endpoints (merged & stateful) ----------
-@app.get("/ivr")
+@app.post("/ivr")
 def ivr():
     # keep GET /ivr for quick browser checks (returns JSON)
     return {"status": "connected", "message": "Hello from IVR (GET)"}
