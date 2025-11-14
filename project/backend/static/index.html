@@ -5,16 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>IVR Call Simulator — Royal Purple</title>
   <style>
-    /* (same CSS you already had; kept compact here for brevity) */
     :root{
       --bg-grad: linear-gradient(135deg,#2b0037 0%, #5b1aa0 40%, #ff6ec7 100%);
       --panel: rgba(255,255,255,0.06);
       --glass: rgba(255,255,255,0.04);
       --accent: #d6a2ff;
-      --accent-2: #ff8ad1;
       --muted: rgba(255,255,255,0.75);
-      --success: #6ef1c7;
-      --danger: #ff7b8a;
       --shadow: 0 10px 30px rgba(11,3,20,0.6);
       --radius: 18px;
       --transition: 240ms cubic-bezier(.2,.9,.3,1);
@@ -22,35 +18,51 @@
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
-    body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background: var(--bg-grad);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
-    .device{width:100%;max-width:920px;display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start}
-    .phone{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;min-height:560px;display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
-    .header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-    .brand{display:flex;gap:12px;align-items:center}
-    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#5b1aa0,#ff6ec7);display:grid;place-items:center;color:white;font-weight:700;font-size:18px}
-    .title{color:var(--muted);font-size:14px}
-    .subtitle{color:rgba(255,255,255,0.5);font-size:12px;margin-top:4px}
-    .status-pill{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
-    .status-icon{font-size:20px}.status-text{color:var(--accent);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.9px}
-    .screen{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;margin-top:8px;flex:1;display:flex;flex-direction:column;gap:14px;border:1px solid rgba(255,255,255,0.025)}
-    .call-info{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .caller{display:flex;flex-direction:column}
-    .caller-number{color:white;font-weight:700;font-size:18px;letter-spacing:0.6px}
-    .call-duration{color:var(--accent);font-weight:600;font-size:13px;margin-top:6px}
-    .speaker-box{width:88px;height:88px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:grid;place-items:center;border:1px solid rgba(255,255,255,0.02)}
-    .ivr{background:var(--glass);border-radius:12px;padding:14px;min-height:160px;max-height:240px;overflow:auto;border:1px solid rgba(255,255,255,0.02)}
-    .ivr p{margin-bottom:10px;color:#fff;opacity:0.95;line-height:1.45}
-    .keypad{display:grid;grid-template-columns:repeat(3,64px);gap:12px}
-    .key{width:64px;height:64px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:white;user-select:none}
-    .key.disabled{opacity:0.45;pointer-events:none}
-    .actions{display:flex;gap:12px;margin-left:auto}
-    .btn{padding:12px 14px;border-radius:12px;font-weight:700;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px;justify-content:center}
-    .btn.call{background:linear-gradient(90deg,#b06bff,#ff7bd6);color:#1a0424}
-    .btn.hang{background:linear-gradient(90deg,#ff6b6b,#ff9c9c);color:#fff}
-    .side{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.02);height:560px;display:flex;flex-direction:column;gap:12px}
-    @media (max-width:920px){.device{grid-template-columns:1fr}.side{height:auto;order:2}.phone{order:1}}
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background: var(--bg-grad);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .device { width:100%; max-width:920px; display:grid; grid-template-columns: 1fr 360px; gap:22px; align-items:start; }
+    .phone { background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); border-radius: var(--radius); box-shadow: var(--shadow); padding:20px; min-height:560px; display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(255,255,255,0.03); }
+    .header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .brand { display:flex; gap:12px; align-items:center; }
+    .logo { width:44px;height:44px;border-radius:10px; background: linear-gradient(135deg,#5b1aa0,#ff6ec7); display:grid;place-items:center;color:white;font-weight:700;font-size:18px; box-shadow: 0 6px 18px rgba(91,26,160,0.24), inset 0 -4px 12px rgba(0,0,0,0.15); }
+    .title { color:var(--muted); font-size:14px; line-height:1; }
+    .subtitle { color: rgba(255,255,255,0.5); font-size:12px; margin-top:4px; }
+    .status-pill { display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); }
+    .status-icon { font-size:20px; }
+    .status-text { color:var(--accent); font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.9px; }
+    .screen { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; padding:18px; margin-top:8px; flex:1; display:flex; flex-direction:column; gap:14px; border:1px solid rgba(255,255,255,0.025); }
+    .call-info { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .caller-number { color:white; font-weight:700; font-size:18px; letter-spacing:0.6px; }
+    .call-duration { color:var(--accent); font-weight:600; font-size:13px; margin-top:6px; }
+    .ivr { background: var(--panel); border-radius:12px; padding:14px; min-height:160px; max-height:240px; overflow:auto; border:1px solid rgba(255,255,255,0.02); }
+    .ivr p { margin-bottom:10px; color: #fff; opacity:0.95; line-height:1.45; }
+    .ivr p.note { color: rgba(255,255,255,0.75); opacity:0.9; }
+    .controls { display:flex; gap:18px; align-items:center; justify-content:space-between; margin-top:10px; flex-wrap:wrap; }
+    .keypad { display:grid; grid-template-columns: repeat(3,64px); gap:12px; justify-content:flex-start; align-items:center; }
+    .key { width:64px;height:64px;border-radius:12px; display:flex;flex-direction:column;justify-content:center;align-items:center; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); cursor:pointer; transition: transform var(--transition), box-shadow var(--transition), background var(--transition); color:white; user-select:none; }
+    .key .num { font-size:18px; font-weight:700 } .key .letters { font-size:10px; opacity:0.75; margin-top:2px }
+    .key:active { transform:translateY(3px) scale(0.99) } .key.disabled { opacity:0.45; pointer-events:none; transform:none }
+    .actions { display:flex; gap:12px; margin-left:auto; }
+    .btn { padding:12px 14px; border-radius:12px; font-weight:700; cursor:pointer; border:none; display:inline-flex; align-items:center; gap:8px; justify-content:center; transition: transform var(--transition), box-shadow var(--transition); box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+    .btn.call { background: linear-gradient(90deg, #b06bff, #ff7bd6); color: #1a0424; transform-origin:center; }
+    .btn.hang { background: linear-gradient(90deg,#ff6b6b,#ff9c9c); color: white; }
+    .btn:disabled { opacity:0.55; cursor:not-allowed; transform:none; box-shadow:none }
+    .side { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius: var(--radius); padding:18px; box-shadow: var(--shadow); border:1px solid rgba(255,255,255,0.02); height:560px; display:flex; flex-direction:column; gap:12px; }
+    .history { background: rgba(255,255,255,0.03); border-radius:12px;padding:12px;flex:1;overflow:auto;border:1px solid rgba(255,255,255,0.02) }
+    .entry { padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03); color:rgba(255,255,255,0.85); font-size:13px }
+    .entry:last-child { border-bottom:none } .small { color:rgba(255,255,255,0.6); font-size:12px; margin-top:6px }
+    @media (max-width:920px){ .device { grid-template-columns: 1fr; } .side { height:auto; order:2 } .phone { order:1 } }
   </style>
 </head>
+
 <body>
   <div class="device">
     <div class="phone" aria-live="polite">
@@ -70,31 +82,40 @@
 
       <div class="screen">
         <div class="call-info">
-          <div class="caller">
+          <div>
             <div class="caller-number">+91 1800-123-456</div>
             <div id="callDuration" class="call-duration">00:00</div>
           </div>
-          <div class="speaker-box"><div class="speaker-emoji">🎧</div></div>
+          <div class="speaker-box" style="width:88px;height:88px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:grid;place-items:center;border:1px solid rgba(255,255,255,0.02);box-shadow:0 8px 24px rgba(0,0,0,0.45);">
+            <div style="font-size:34px;">🎧</div>
+          </div>
         </div>
 
         <div id="ivrOutput" class="ivr" aria-atomic="true">
           <p class="note">Press <strong>Start Call</strong> to begin...</p>
         </div>
 
+        <div id="speakingIndicator" class="speaking hidden" aria-hidden="true" style="display:none;margin-top:6px;">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+
         <div class="controls">
           <div id="keypad" class="keypad" aria-hidden="true">
-            <div class="key" data-key="1"><div class="num">1</div></div>
+            <div class="key" data-key="1"><div class="num">1</div><div class="letters"></div></div>
             <div class="key" data-key="2"><div class="num">2</div><div class="letters">ABC</div></div>
             <div class="key" data-key="3"><div class="num">3</div><div class="letters">DEF</div></div>
+
             <div class="key" data-key="4"><div class="num">4</div><div class="letters">GHI</div></div>
             <div class="key" data-key="5"><div class="num">5</div><div class="letters">JKL</div></div>
             <div class="key" data-key="6"><div class="num">6</div><div class="letters">MNO</div></div>
+
             <div class="key" data-key="7"><div class="num">7</div><div class="letters">PQRS</div></div>
             <div class="key" data-key="8"><div class="num">8</div><div class="letters">TUV</div></div>
             <div class="key" data-key="9"><div class="num">9</div><div class="letters">WXYZ</div></div>
-            <div class="key" data-key="*"><div class="num">*</div></div>
+
+            <div class="key" data-key="*"><div class="num">*</div><div class="letters"></div></div>
             <div class="key" data-key="0"><div class="num">0</div><div class="letters">+</div></div>
-            <div class="key" data-key="#"><div class="num">#</div></div>
+            <div class="key" data-key="#"><div class="num">#</div><div class="letters"></div></div>
           </div>
 
           <div class="actions">
@@ -107,17 +128,16 @@
 
     <aside class="side" aria-label="Call history and options">
       <h4>Call Log</h4>
-      <div id="callHistory" class="history"><div class="entry">No calls yet</div></div>
+      <div id="callHistory" class="history">
+        <div class="entry">No calls yet</div>
+      </div>
       <div class="small">Tip: Use keypad while call is active to navigate IVR. Press 9 to transfer to agent.</div>
     </aside>
   </div>
 
 <script>
-/* ---------- Configuration ----------
-   We call relative endpoints so this will work when static is served by the same backend.
-   If you host frontend separately, set BACKEND_BASE to the backend full URL (no trailing slash).
-*/
-const BACKEND_BASE = ""; // leave blank so fetch('/ivr') => same origin
+/* Configuration */
+const BACKEND_BASE = "https://ai-enabled-conversational-ivr-bctv.onrender.com"; // update if needed
 
 /* Elements */
 const btnCall = document.getElementById('btnCall');
@@ -125,6 +145,7 @@ const btnHang = document.getElementById('btnHangup');
 const keypad = document.getElementById('keypad');
 const keys = Array.from(document.querySelectorAll('.key'));
 const ivrOutput = document.getElementById('ivrOutput');
+const speakingIndicator = document.getElementById('speakingIndicator');
 const callHistory = document.getElementById('callHistory');
 const statusIcon = document.getElementById('statusIcon');
 const statusText = document.getElementById('statusText');
@@ -133,100 +154,219 @@ const callDurationEl = document.getElementById('callDuration');
 let callActive = false;
 let callStart = null;
 let durationTimer = null;
-let historyArr = [];
+let currentMenu = 'main';
+let history = [];
 let frontendCallSid = null;
+
+/* Audio beep */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playBeep() {
+  try {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = 800;
+    g.gain.value = 0.02;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    setTimeout(() => { o.stop(); }, 120);
+  } catch (e) { /* ignore */ }
+}
 
 /* Utilities */
 const wait = ms => new Promise(r => setTimeout(r, ms));
-function appendIVR(text){ const p = document.createElement('p'); p.textContent = text; ivrOutput.appendChild(p); ivrOutput.scrollTop = ivrOutput.scrollHeight; }
-function addLog(type, status){ const time = new Date().toLocaleTimeString(); historyArr.unshift(`${time} - ${type} - ${status}`); renderHistory(); }
-function renderHistory(){ callHistory.innerHTML = historyArr.length ? historyArr.slice(0,20).map(h => `<div class="entry">${h}</div>`).join('') : '<div class="entry">No calls yet</div>'; }
-function enableKeypad(enabled){ keys.forEach(k => enabled ? k.classList.remove('disabled') : k.classList.add('disabled')); keypad.setAttribute('aria-hidden', !enabled); }
-function setStatus(icon, text){ statusIcon.textContent = icon; statusText.textContent = text; }
+
+function appendIVR(text, opts={}) {
+  const p = document.createElement('p');
+  if (opts.className) p.className = opts.className;
+  p.textContent = text;
+  ivrOutput.appendChild(p);
+  ivrOutput.scrollTop = ivrOutput.scrollHeight;
+}
+
+function showMessage(text) {
+  ivrOutput.innerHTML += `<p>${escapeHtml(text)}</p>`;
+  ivrOutput.scrollTop = ivrOutput.scrollHeight;
+}
+
+function escapeHtml(unsafe) {
+  return (unsafe || "")
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function addLog(type, status) {
+  const time = new Date().toLocaleTimeString();
+  history.unshift(`${time} - ${type} - ${status}`);
+  renderHistory();
+}
+function renderHistory() {
+  if (history.length === 0) {
+    callHistory.innerHTML = '<div class="entry">No calls yet</div>';
+    return;
+  }
+  callHistory.innerHTML = history.slice(0, 20).map(h => `<div class="entry">${h}</div>`).join('');
+}
 
 /* Duration */
-function startDuration(){ callStart = Date.now(); durationTimer = setInterval(()=>{ const s=Math.floor((Date.now()-callStart)/1000); const m=String(Math.floor(s/60)).padStart(2,'0'); const sec=String(s%60).padStart(2,'0'); callDurationEl.textContent = `${m}:${sec}`; },1000); }
-function stopDuration(){ clearInterval(durationTimer); durationTimer=null; }
+function startDuration(){
+  callStart = Date.now();
+  durationTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - callStart)/1000);
+    const m = String(Math.floor(s/60)).padStart(2, '0');
+    const sec = String(s % 60).padStart(2, '0');
+    callDurationEl.textContent = `${m}:${sec}`;
+  }, 1000);
+}
+function stopDuration(){ clearInterval(durationTimer); durationTimer = null; }
 
-/* Simple beep */
-const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-function playBeep(){ try{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.value=800; g.gain.value=0.02; o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(),120);}catch(e){} }
+/* UI helpers */
+function enableKeypad(enabled){
+  keys.forEach(k => {
+    if (enabled) k.classList.remove('disabled');
+    else k.classList.add('disabled');
+  });
+  keypad.setAttribute('aria-hidden', (!enabled).toString());
+}
+function setStatus(icon, text){
+  statusIcon.textContent = icon;
+  statusText.textContent = text;
+}
 
-/* Local welcome text (visual) */
+/* speak visual */
+async function speakText(text){
+  speakingIndicator.style.display = 'flex';
+  appendIVR('🔊 ' + text);
+  const dur = Math.max(500, text.length * 40);
+  await wait(dur);
+  speakingIndicator.style.display = 'none';
+}
+
+/* Local IVR flow */
 async function playWelcome(){
-  appendIVR('🔊 Welcome to Air India Airlines Customer Support.');
+  await speakText("Welcome to Air India Airlines Customer Support.");
   await wait(500);
-  appendIVR('🔊 Press 1 for Booking Enquiry.');
+  await speakText("Press 1 for Booking Enquiry.");
   await wait(300);
-  appendIVR('🔊 Press 2 for Flight Status.');
+  await speakText("Press 2 for Flight Status.");
   await wait(300);
-  appendIVR('🔊 Press 9 to speak with an agent.');
+  await speakText("Press 9 to speak with an agent.");
+}
+async function handleMain(digit){
+  if (digit === '1') {
+    currentMenu = 'booking';
+    await speakText("You selected Booking Enquiry.");
+    await wait(500);
+    await speakText("Press 1 for Domestic Flights.");
+    await wait(300);
+    await speakText("Press 2 for International Flights.");
+    await wait(300);
+    await speakText("Press 0 to go back to main menu.");
+  } else if (digit === '2') {
+    await speakText("You selected Flight Status.");
+    await wait(500);
+    await speakText("Please enter your 6-digit PNR number followed by hash.");
+  } else if (digit === '9') {
+    await speakText("Transferring you to an agent. Please hold.");
+    await wait(1000);
+    endCall();
+  } else {
+    await speakText("Sorry, that was not a valid option. Please try again.");
+  }
+}
+async function handleBooking(digit){
+  if (digit === '1') {
+    await speakText("You selected Domestic Flights.");
+    await wait(500);
+    await speakText("Our team will call you back within 5 minutes.");
+    await wait(500);
+    await speakText("Thank you for calling Air India. Goodbye.");
+    await wait(1000);
+    endCall();
+  } else if (digit === '2') {
+    await speakText("You selected International Flights.");
+    await wait(500);
+    await speakText("Please visit our website airindia.com for international bookings.");
+    await wait(500);
+    await speakText("Thank you. Goodbye.");
+    await wait(1000);
+    endCall();
+  } else if (digit === '0') {
+    currentMenu = 'main';
+    await playWelcome();
+  } else {
+    await speakText("Invalid option. Please try again.");
+  }
 }
 
-/* Backend calls (Twilio-like) */
-async function fetchIVRFromBackend(){
-  try{
-    appendIVR('Calling backend /ivr...');
+/* Backend integration */
+async function sendKeyToBackend(digit) {
+  if (!callActive) {
+    showMessage('Call not active — key ignored (use Start Call).');
+    return;
+  }
+  try {
+    showMessage(`You pressed ${digit} (sending to backend)`);
     frontendCallSid = frontendCallSid || `FE_${Date.now()}`;
-    const fd = new FormData(); fd.append('CallSid', frontendCallSid);
-    const res = await fetch(`${BACKEND_BASE}/ivr`, { method: 'POST', body: fd });
-    if (!res.ok){ appendIVR(`Backend /ivr returned ${res.status}`); return; }
+    const fd = new FormData();
+    fd.append('CallSid', frontendCallSid);
+    fd.append('Digits', (digit || '').toString());
+    const res = await fetch(`${BACKEND_BASE}/handle-key`, { method: 'POST', mode: 'cors', body: fd });
+    if (!res.ok) {
+      showMessage(`/handle-key returned ${res.status}`);
+      return;
+    }
+    const ct = res.headers.get('content-type') || '';
     const text = await res.text();
-    // try to parse TwiML <Say> occurrences
-    if (text.trim().startsWith('<')){
+    if (ct.includes('xml') || text.trim().startsWith('<')) {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(text,'text/xml');
-      const says = Array.from(doc.querySelectorAll('Say')).map(s=>s.textContent.trim()).filter(Boolean);
-      if (says.length) says.forEach(s => appendIVR(`Backend: ${s}`));
-      else appendIVR(`Backend XML: ${text}`);
+      const doc = parser.parseFromString(text, 'text/xml');
+      const say = doc.querySelector('Say');
+      if (say && say.textContent) showMessage(`Backend (Say): ${say.textContent}`);
+      else showMessage(`Backend (XML): ${text}`);
     } else {
-      appendIVR(`Backend: ${text}`);
+      try {
+        const j = JSON.parse(text);
+        showMessage(`/handle-key JSON: ${JSON.stringify(j)}`);
+      } catch (e) {
+        showMessage(`/handle-key raw: ${text}`);
+      }
     }
-  }catch(e){ appendIVR(`Backend error: ${e.message}`); console.error(e); }
+  } catch (e) {
+    showMessage(`Backend error: ${e.message}`);
+    console.error(e);
+  }
 }
 
-async function sendKeyToBackend(digit){
-  try{
-    frontendCallSid = frontendCallSid || `FE_${Date.now()}`;
-    const fd = new FormData(); fd.append('CallSid', frontendCallSid); fd.append('Digits', digit);
-    const res = await fetch(`${BACKEND_BASE}/handle-key`, { method: 'POST', body: fd });
-    if (!res.ok){ appendIVR(`/handle-key returned ${res.status}`); return; }
-    const text = await res.text();
-    if (text.trim().startsWith('<')){
-      const doc = new DOMParser().parseFromString(text,'text/xml');
-      const says = Array.from(doc.querySelectorAll('Say')).map(s=>s.textContent.trim()).filter(Boolean);
-      if (says.length) says.forEach(s => appendIVR(`Backend: ${s}`));
-      else appendIVR(`Backend XML: ${text}`);
-    } else {
-      appendIVR(`/handle-key: ${text}`);
-    }
-  }catch(e){ appendIVR(`Backend error: ${e.message}`); console.error(e); }
-}
-
-/* Key press handling */
-async function onKeyPress(d){
+/* High-level event handlers */
+async function onKeyPress(d) {
   if (!callActive) return;
   playBeep();
   appendIVR(`[You pressed: ${d}]`);
-  // send to backend so server can handle DTMF if you want
-  sendKeyToBackend(d);
+  // local simulator
+  if (currentMenu === 'main') await handleMain(d);
+  else if (currentMenu === 'booking') await handleBooking(d);
+
+  // send to backend too (optional): uncomment if you want backend to drive responses
+  // await sendKeyToBackend(d);
 }
 
-/* Start / end call */
 async function startCall(){
   if (callActive) return;
-  try{ if (audioCtx.state === 'suspended') await audioCtx.resume(); }catch(e){}
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
   callActive = true;
+  callStart = Date.now();
   setStatus('📞','Call Connected');
-  btnCall.disabled = true; btnHang.disabled = false;
+  btnCall.disabled = true;
+  btnHang.disabled = false;
   enableKeypad(true);
   ivrOutput.innerHTML = '';
   startDuration();
   addLog('Outgoing','Connected');
+  currentMenu = 'main';
   frontendCallSid = `FE_${Date.now()}`;
-  // fetch initial TwiML from backend to populate IVR (optional)
-  await fetchIVRFromBackend();
-  // also play local welcome so UI shows something reliably
   await playWelcome();
 }
 
@@ -234,29 +374,43 @@ function endCall(){
   if (!callActive) return;
   callActive = false;
   setStatus('📵','Call Ended');
-  btnCall.disabled = false; btnHang.disabled = true;
+  btnCall.disabled = false;
+  btnHang.disabled = true;
   enableKeypad(false);
   stopDuration();
-  addLog('Outgoing','Ended');
-  setTimeout(()=>{ setStatus('📞','Ready to Call'); callDurationEl.textContent='00:00'; ivrOutput.innerHTML=`<p class="note">Press <strong>Start Call</strong> to begin...</p>` },1200);
+  const totalSec = Math.floor((Date.now() - callStart)/1000);
+  addLog('Outgoing', `Ended (${totalSec}s)`);
+  setTimeout(() => {
+    setStatus('📞','Ready to Call');
+    callDurationEl.textContent = '00:00';
+    ivrOutput.innerHTML = `<p class="note">Press <strong>Start Call</strong> to begin...</p>`;
+    currentMenu = 'main';
+  }, 1200);
 }
 
-/* Wire UI */
-btnCall.addEventListener('click', async ()=>{ await startCall(); });
-btnHang.addEventListener('click', ()=> endCall());
+/* Wire UI events */
+btnCall.addEventListener('click', async () => {
+  await startCall();
+});
+btnHang.addEventListener('click', endCall);
+
 keys.forEach(k => {
-  k.addEventListener('click', ()=> {
+  k.addEventListener('click', () => {
     const d = k.getAttribute('data-key');
     onKeyPress(d);
+    // you may enable backend DTMF by uncommenting sendKeyToBackend
+    if (callActive) {
+      // sendKeyToBackend(d); // <<< enable if you want backend handling
+    }
   });
 });
 
-/* init */
+// init
 enableKeypad(false);
 renderHistory();
 
-/* keyboard support */
-window.addEventListener('keydown', ev => {
+// keyboard support
+window.addEventListener('keydown', (ev) => {
   const key = ev.key;
   const valid = ['0','1','2','3','4','5','6','7','8','9','*','#'];
   if (valid.includes(key)) {

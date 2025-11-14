@@ -3,11 +3,10 @@ import os
 import re
 import random
 import logging
-from enum import Enum
 from datetime import datetime
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, List, Optional
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.responses import Response, JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -15,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from twilio.twiml.voice_response import VoiceResponse, Gather
 
-# Optional OpenAI import (if you put API key in env and installed openai)
+# Optional OpenAI import (only used if you install openai and set OPENAI_API_KEY)
 try:
     import openai
     OPENAI_AVAILABLE = True
@@ -25,9 +24,9 @@ except Exception:
 # ---------- Config ----------
 API_TITLE = "Air India Conversational IVR - Merged"
 API_VERSION = "1.0.0-merged"
-AGENT_NUMBER = os.getenv("AGENT_NUMBER", "+911234567890")
+# Use your Twilio/agent phone number here or set AGENT_NUMBER env var
+AGENT_NUMBER = os.getenv("AGENT_NUMBER", "+18314805664")
 
-# Serve frontend from ./static (put index.html and assets in static/)
 BASE_DIR = os.path.dirname(__file__)
 FRONTEND_DIR = os.path.join(BASE_DIR, "static")
 STATIC_INDEX = os.path.join(FRONTEND_DIR, "index.html")
@@ -43,7 +42,7 @@ logger = logging.getLogger("airindia_ivr_merged")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # in prod lock this down
+    allow_origins=["*"],  # tighten in prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,13 +54,12 @@ if os.path.isfile(STATIC_INDEX):
 else:
     logger.info("Static frontend index not found at %s", STATIC_INDEX)
 
-# ---------- Simple models ----------
+# ---------- Simple models & in-memory state ----------
 class Booking(BaseModel):
     flight_id: int
     passenger_name: str = Field(..., min_length=2)
     seats: int = Field(1, gt=0)
 
-# ---------- In-memory state ----------
 booking_db: List[Dict[str, Any]] = []
 call_sessions: Dict[str, Dict[str, Any]] = {}
 
@@ -78,7 +76,7 @@ IVR_MENU = {
 # ---------- Helpers ----------
 def format_phone_for_speech(phone_number: str) -> str:
     digits = re.sub(r'[^\d]', '', phone_number or "")
-    digit_words = {'0': 'zero','1':'one','2':'two','3':'three','4':'four','5':'five','6':'six','7':'seven','8':'eight','9':'nine'}
+    digit_words = {str(i): w for i, w in enumerate(["zero","one","two","three","four","five","six","seven","eight","nine"])}
     if len(digits) == 10:
         part1 = ' '.join([digit_words.get(d,d) for d in digits[:3]])
         part2 = ' '.join([digit_words.get(d,d) for d in digits[3:6]])
@@ -98,10 +96,17 @@ def format_flight_status(pnr_or_id: str) -> str:
 
 def get_or_create_session(call_sid: str) -> Dict[str, Any]:
     if call_sid not in call_sessions:
-        call_sessions[call_sid] = {"menu":"main","history":[],"state":"main_menu","pending_contact":None}
+        call_sessions[call_sid] = {
+            "menu": "main",
+            "history": [],
+            "state": "main_menu",
+            "pending_contact": None,
+            "retry_count": 0,
+            "meta": {}
+        }
     return call_sessions[call_sid]
 
-# ---------- Optional lightweight NLU (no external deps) ----------
+# Lightweight NLU (no external deps)
 def simple_intent(user: str) -> str:
     s = (user or "").lower()
     if any(w in s for w in ("book","booking","ticket","reservation","domestic","international")):
@@ -116,18 +121,41 @@ def simple_intent(user: str) -> str:
         return "goodbye"
     return "unknown"
 
-# ---------- Twilio-like IVR endpoints ----------
+# Optional small LLM fallback
+def generate_ai_reply(prompt: str) -> str:
+    if OPENAI_API_KEY and OPENAI_AVAILABLE:
+        try:
+            messages = [{"role":"system","content":"You are a concise IVR assistant for Air India."},
+                        {"role":"user","content": prompt}]
+            resp = openai.ChatCompletion.create(model="gpt-4o-mini", messages=messages, max_tokens=120, temperature=0.2)
+            return resp.choices[0].message.content.strip()
+        except Exception:
+            logger.exception("OpenAI call failed; falling back to rule-based reply.")
+    # simple fallback rules
+    p = (prompt or "").lower()
+    if "pnr" in p or re.search(r'\b[a-z0-9]{6}\b', p):
+        return format_flight_status(prompt)
+    if "booking" in p:
+        return "For booking, our team will contact you shortly. For international bookings please visit airindia.com."
+    if "baggage" in p or "refund" in p:
+        return "Please provide your booking reference and details—our baggage team will contact you within 24 hours."
+    if "agent" in p:
+        return "Please hold while I connect you to an agent."
+    return "I didn't understand — would you like to go to the main menu or speak to an agent?"
+
+# ---------- Twilio-like IVR endpoints (use /ivr per your choice) ----------
 @app.post("/ivr")
 async def ivr_entry(request: Request):
     """
-    Frontend calls POST /ivr (multipart/form-data) with optional CallSid.
-    Returns TwiML XML (VoiceResponse).
+    Entry endpoint expected by the frontend simulator.
+    Accepts multipart form data with optional CallSid and returns TwiML XML.
     """
     form = await request.form()
     call_sid = form.get("CallSid") or f"FE_{random.randint(1000,9999)}"
+    logger.info("Incoming /ivr call_sid=%s", call_sid)
     session = get_or_create_session(call_sid)
 
-    # Set a simple main menu TwiML
+    # Build TwiML main menu
     resp = VoiceResponse()
     gather = Gather(num_digits=1, input="speech dtmf", timeout=6, action="/handle-key", method="POST")
     gather.say(IVR_MENU["main"]["prompt"], voice="alice")
@@ -139,16 +167,15 @@ async def ivr_entry(request: Request):
 @app.post("/handle-key")
 async def handle_key(request: Request):
     """
-    Receives Digits or SpeechResult. Returns TwiML response depending on choice.
-    Frontend will call this when user presses keys during an active call.
+    Handle DTMF or speech input after main menu.
     """
     form = await request.form()
     call_sid = form.get("CallSid") or f"FE_{random.randint(1000,9999)}"
     digits = (form.get("Digits") or "").strip()
     speech = (form.get("SpeechResult") or "").strip()
+    logger.info("handle-key call_sid=%s digits=%r speech=%r", call_sid, digits, speech)
     session = get_or_create_session(call_sid)
 
-    # prefer digits, else infer from speech
     choice = digits or None
     if not choice and speech:
         it = simple_intent(speech)
@@ -158,7 +185,7 @@ async def handle_key(request: Request):
         elif it == "agent": choice = "9"
 
     resp = VoiceResponse()
-    # Booking flow
+    # Booking route
     if choice == "1":
         gather = Gather(input="speech dtmf", timeout=6, action="/twilio/booking", method="POST")
         gather.say(IVR_MENU["booking"]["prompt"], voice="alice")
@@ -169,7 +196,6 @@ async def handle_key(request: Request):
 
     # Flight status
     if choice == "2":
-        # ask for PNR
         gather = Gather(input="speech dtmf", num_digits=6, timeout=8, action="/twilio/conversation", method="POST")
         resp.say("Please say your 6 digit P N R after the beep, or enter it on your keypad.", voice="alice")
         resp.append(gather)
@@ -177,7 +203,7 @@ async def handle_key(request: Request):
         resp.redirect("/ivr")
         return Response(content=str(resp), media_type="application/xml")
 
-    # Baggage
+    # Baggage/refund
     if choice == "3":
         gather = Gather(input="speech", timeout=8, action="/twilio/conversation", method="POST")
         resp.say("Please describe your baggage or refund issue after the beep. I will note it.", voice="alice")
@@ -186,6 +212,7 @@ async def handle_key(request: Request):
         resp.redirect("/ivr")
         return Response(content=str(resp), media_type="application/xml")
 
+    # Agent
     if choice == "9":
         resp.say("Connecting you to an agent. Please hold.", voice="alice")
         resp.dial(AGENT_NUMBER)
@@ -196,12 +223,14 @@ async def handle_key(request: Request):
     resp.redirect("/ivr")
     return Response(content=str(resp), media_type="application/xml")
 
+
 @app.post("/twilio/booking")
 async def twilio_booking(request: Request):
     form = await request.form()
     call_sid = form.get("CallSid") or f"FE_{random.randint(1000,9999)}"
     digits = (form.get("Digits") or "").strip()
     speech = (form.get("SpeechResult") or "").strip()
+    logger.info("twilio/booking call_sid=%s digits=%r speech=%r", call_sid, digits, speech)
 
     choice = digits or None
     if not choice and speech:
@@ -227,49 +256,31 @@ async def twilio_booking(request: Request):
     resp.redirect("/ivr")
     return Response(content=str(resp), media_type="application/xml")
 
+
 @app.post("/twilio/conversation")
 async def twilio_conversation(request: Request):
     """
-    This endpoint receives a digits (PNR) or speech result and replies with TwiML.
-    The function includes simple NLU and templated replies. If OPENAI_API_KEY present
-    and openai installed, it will attempt a short AI reply.
+    Receives speech or digits and responds (PNR detection + AI fallback).
     """
     form = await request.form()
     call_sid = form.get("CallSid") or f"FE_{random.randint(1000,9999)}"
     speech = (form.get("SpeechResult") or "").strip()
     digits = (form.get("Digits") or "").strip()
-    user_input = speech or digits or ""
+    user_input = (speech or digits or "").strip()
+    logger.info("twilio/conversation call_sid=%s input=%r", call_sid, user_input)
 
-    # If the input looks like a PNR or flight id -> reply with status
+    # quick detect PNR-like input
     if user_input:
-        # quick PNR detection
-        up = user_input.strip()
-        if re.match(r'^[A-Za-z0-9]{6,}$', up.replace(" ", "")):
+        up = user_input.replace(" ", "")
+        if re.match(r'^[A-Za-z0-9]{6,}$', up):
             reply_text = format_flight_status(up)
             resp = VoiceResponse()
             resp.say(reply_text, voice="alice")
             resp.hangup()
             return Response(content=str(resp), media_type="application/xml")
 
-    # fallback: simple AI-ish or templated reply
-    reply_text = "I'm sorry, I couldn't detect a P N R. Please try again or say 'agent' to speak to a human."
-
-    # If openai available, attempt short completion (safe guard)
-    if OPENAI_API_KEY and OPENAI_AVAILABLE:
-        try:
-            msg = f"User input: {user_input}\nReply shortly as an IVR: provide helpful instruction."
-            # minimal safe usage: use completion/chat based on your openai package
-            rsp = openai.ChatCompletion.create(
-                model="gpt-4o-mini" if "gpt-4o-mini" else "gpt-4o-mini",
-                messages=[{"role":"user","content":msg}],
-                max_tokens=120,
-                temperature=0.2
-            )
-            ai_text = rsp.choices[0].message.content.strip()
-            if ai_text:
-                reply_text = ai_text
-        except Exception:
-            logger.exception("OpenAI attempt failed, using fallback reply.")
+    # fallback: AI or templated
+    reply_text = generate_ai_reply(user_input or "Hello. How can I help?")
 
     resp = VoiceResponse()
     resp.say(reply_text, voice="alice")
@@ -284,12 +295,11 @@ def status():
 
 @app.get("/")
 async def root():
-    # If static index exists, FileResponse will be served by mounted StaticFiles already.
     if os.path.isfile(STATIC_INDEX):
         return FileResponse(STATIC_INDEX)
     return JSONResponse({"message":"IVR backend running", "version": API_VERSION})
 
-# Global exception handler (keeps logs clean)
+# Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.exception("Unhandled exception: %s", exc)
