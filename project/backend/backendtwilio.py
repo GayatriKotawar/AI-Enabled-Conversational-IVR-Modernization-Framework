@@ -276,12 +276,9 @@ def generate_ai_reply(prompt: str, session_history: Optional[List[Dict[str,str]]
 
 # ---------- Twilio IVR endpoints (merged & stateful) ----------
 @app.post("/ivr")
-async def ivr_post():
-    return {"status": "connected", "message": "Hello from IVR (POST)"}
-
-# --- NEW: allow POST /ivr for your frontend which expects TwiML/XML ---
-@app.post("/ivr")
 async def ivr_post(request: Request) -> Response:
+    return await twilio_ivr(request)
+
     """
     Forward POST /ivr to the Twilio-style IVR entrypoint (twilio_ivr).
     This ensures the front-end fetch('/ivr', {method: 'POST'}) receives TwiML XML.
