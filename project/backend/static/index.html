@@ -239,8 +239,22 @@ function setStatus(icon, text){
 async function speakText(text){
   speakingIndicator.style.display = 'flex';
   appendIVR('🔊 ' + text);
-  const dur = Math.max(500, text.length * 40);
-  await wait(dur);
+
+  // --- NEW CODE FOR VOICE ---
+  try {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "en-IN";   // You can set "en-IN" for Indian English
+    utter.rate = 1;
+    utter.pitch = 1;
+    speechSynthesis.speak(utter);
+
+    // wait until speech ends
+    await new Promise(resolve => utter.onend = resolve);
+  } catch (e) {
+    console.error("Speech synthesis error:", e);
+  }
+  // --------------------------
+
   speakingIndicator.style.display = 'none';
 }
 
